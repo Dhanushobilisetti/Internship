@@ -1,0 +1,32 @@
+import java.util.*;
+class Student
+{
+	int rno;
+	String name;
+	float cgpa;
+	Scanner sc=new Scanner(System.in);
+		void read()
+		{
+			System.out.println("ENTER rno: ");
+			rno=sc.nextInt();
+			System.out.println("ENTER name: ");
+			name=sc.next();
+			System.out.println("ENTER cgpa: ");
+			cgpa=sc.nextFloat();
+		}
+		void display()
+		{
+			this read();
+			System.out.println("rno is: "+rno);
+			System.out.println("name is: "+name");
+			System.out.println("cgpa is: "+cgpa);
+		}
+}
+class Main
+{
+public static void main(String args[])
+{
+	Student s1=new Student();
+	s1.display();
+}
+}

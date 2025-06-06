@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-width: 500px;
+        }
+        input, button {
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #taskList {
+            margin-top: 20px;
+        }
+        .task {
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .timer {
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Task Manager</h1>
+    <input type="text" id="taskInput" placeholder="Enter your task">
+    <input type="date" id="dateInput">
+    <input type="time" id="timeInput">
+    <input type="number" id="timerInput" placeholder="Timer (minutes)" min="1">
+    <button id="addTaskButton">Add Task</button>
+
+    <div id="taskList"></div>
+
+    <script>
+        document.getElementById('addTaskButton').addEventListener('click', function() {
+            const taskInput = document.getElementById('taskInput').value;
+            const dateInput = document.getElementById('dateInput').value;
+            const timeInput = document.getElementById('timeInput').value;
+            const timerInput = document.getElementById('timerInput').value;
+
+            if (!taskInput || !dateInput || !timeInput || !timerInput) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const timerDuration = parseInt(timerInput) * 60; // Convert minutes to seconds
+            let remainingTime = timerDuration;
+
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'task';
+            taskDiv.innerHTML = `
+                <strong>Task:</strong> ${taskInput} <br>
+                <strong>Due:</strong> ${new Date(`${dateInput}T${timeInput}`).toLocaleString()} <br>
+                <span class="timer">Time remaining: ${remainingTime} seconds</span>
+                <button class="deleteButton">Delete</button>
+            `;
+            document.getElementById('taskList').appendChild(taskDiv);
+
+            // Countdown timer
+            const timerId = setInterval(() => {
+                remainingTime--;
+                taskDiv.querySelector('.timer').textContent = `Time remaining: ${remainingTime} seconds`;
+
+                if (remainingTime <= 0) {
+                    clearInterval(timerId);
+                    alert(`Time's up for: ${taskInput}`);
+                    taskDiv.style.backgroundColor = '#ffcccc';
+                }
+            }, 1000);
+
+            // Delete button functionality
+            taskDiv.querySelector('.deleteButton').addEventListener('click', function() {
+                clearInterval(timerId); // Clear the timer
+                taskDiv.remove(); // Remove the task
+            });
+
+            // Clear inputs
+            document.getElementById('taskInput').value = '';
+            document.getElementById('dateInput').value = '';
+            document.getElementById('timeInput').value = '';
+            document.getElementById('timerInput').value = '';
+        });
+    </script>
+</body>
+</html>

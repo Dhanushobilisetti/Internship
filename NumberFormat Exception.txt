@@ -1,0 +1,17 @@
+class Exception
+{
+	public static void main(String args[])
+	{
+		try
+		{
+			string s="abc";
+			int i= Integer.parseInt(s);
+		}
+		catch(NumberFormat Exception e)
+		{
+			System.out.println(e);
+		}
+			System.out.println("Rest of the code");
+	}
+}
+		

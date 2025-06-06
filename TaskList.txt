@@ -1,0 +1,56 @@
+import React, { useState } from 'react';
+import TaskItem from './TaskItem';
+const tasks=[
+    {
+        id:1,
+        name:"Task 1",
+        description:"Task 1 description",
+        completed:false,
+    },
+    {
+        id:2,
+        name:"Task 2",
+        description:"Task 2 description",
+        completed:true,
+    },
+    {
+        id:3,
+        name:"Task 3",
+        description:"Task 3 description",
+        completed:false,
+    },
+    {
+        id:4,
+        name:"Task 4",
+        description:"Task 4 description",
+        completed:false,
+    },
+    {
+        id:5,
+        name:"Task 5",
+        description:"Task 5 description",
+        completed:false,
+    },
+
+];
+function TaskList() {
+    const [todos,setTodos]=useState(tasks);
+
+  return (
+    <div>
+        <h1>Task List</h1>
+        <div className='task-list'>
+            {todos.length > 0 ? (
+                todos.map( (task,index) => (
+                    //<div key={index}>{task}</div>
+                    <TaskItem key={index} Task={task} toggleChecked={setTodos} />
+                ))
+            ) : (
+                <div>no tasks</div>
+            )}
+        </div>
+    </div>
+  );
+}
+
+export default TaskList

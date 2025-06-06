@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Task Manager</title>
+    <style>
+        /* Same CSS code as before */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Personal Task Manager</h1>
+        <ul id="taskList" class="task-list"></ul>
+        <div class="buttons">
+            <button id="addButton">Add Task</button>
+            <button id="completeButton">Mark Complete</button>
+        </div>
+        <div class="notification" id="notification"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskList = document.getElementById('taskList');
+            const addButton = document.getElementById('addButton');
+            const completeButton = document.getElementById('completeButton');
+            const notification = document.getElementById('notification');
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+            function renderTasks() {
+                taskList.innerHTML = '';
+                tasks.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `${task.text} <span>Due: ${task.dueDate} ${task.dueTime}</span>`;
+                    if (task.complete) {
+                        li.classList.add('complete');
+                    }
+                    li.setAttribute('data-index', index);
+                    taskList.appendChild(li);
+                });
+            }
+
+            function saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+
+            function sendEmailNotification(taskText, dueDate, dueTime) {
+                const recipientEmail = 'recipient-email@gmail.com'; // Replace with the recipient's email
+                fetch('http://localhost:3000/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        taskText: taskText,
+                        dueDate: dueDate,
+                        dueTime: dueTime,
+                        recipientEmail: recipientEmail,
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Email sent:', data);
+                })
+                .catch((error) => {
+                    console.error('Error sending email:', error);
+                });
+            }
+
+            // Automatically alert for upcoming tasks
+            function autoAlertForTasks() {
+                const now = new Date();
+                tasks.forEach(task => {
+                    const taskDueDate = new Date(`${task.dueDate}T${task.dueTime}:00`);
+                    const timeDiff = taskDueDate - now;
+                    const timeThreshold = 30 * 60 * 1000; // 30 minutes in milliseconds
+                    if (timeDiff > 0 && timeDiff <= timeThreshold) {
+                        sendEmailNotification(task.text, task.dueDate, task.dueTime);
+                    } else if (timeDiff < 0 && !task.complete) {
+                        sendEmailNotification(task.text, task.dueDate, task.dueTime);
+                    }
+                });
+            }
+
+            // Periodically check for tasks every minute (60000 ms)
+            setInterval(autoAlertForTasks, 60000);
+
+            addButton.addEventListener('click', () => {
+                const newTask = prompt('Enter new task:');
+                const dueDate = prompt('Enter due date (YYYY-MM-DD):');
+                const dueTime = prompt('Enter due time (HH:MM):');
+                if (newTask && dueDate && dueTime) {
+                    tasks.push({ text: newTask, dueDate: dueDate, dueTime: dueTime, complete: false });
+                    renderTasks();
+                    saveTasks();
+                }
+            });
+
+            completeButton.addEventListener('click', () => {
+                const selectedTaskIndex = getSelectedTaskIndex();
+                if (selectedTaskIndex !== -1) {
+                    tasks.splice(selectedTaskIndex, 1); // Remove the task from the list
+                    renderTasks();
+                    saveTasks();
+                } else {
+                    alert('Please select a task to complete.');
+                }
+            });
+
+            function getSelectedTaskIndex() {
+                const selectedTask = document.querySelector('li.selected');
+                return selectedTask ? parseInt(selectedTask.getAttribute('data-index'), 10) : -1;
+            }
+
+            taskList.addEventListener('click', (event) => {
+                const li = event.target.closest('li');
+                if (li) {
+                    document.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
+                    li.classList.add('selected');
+                }
+            });
+
+            renderTasks();
+        });
+    </script>
+</body>
+</html>

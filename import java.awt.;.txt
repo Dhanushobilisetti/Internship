@@ -1,0 +1,25 @@
+import java.awt.*;
+import java.awt.event.*;
+class AEvent1 implements ActionListener,WindowListener
+{
+  Frame f1;
+  Button b;
+  TextField t1;
+  AEvent1()
+  {
+    f1 =new Frame();
+    b  =new Button("click");
+    t1 =new TextField("Hero...");
+    t1.setBounds(200,180,140,120);
+    b.addActionListener(this);
+    f1.addWindowListener(this);
+    b.setBounds(200,180,140,120);
+    f1.add(b);f1.add(t1);
+    f1.setSize(400,500);
+    f1.setVisible(true); 
+  }
+public void addFocusListener(ActionEvent e)
+ {
+   t1.setText("Welcome");
+ }
+public void windowClosing(WindowEvent we){System.out.println("Activated");}

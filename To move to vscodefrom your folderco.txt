@@ -1,0 +1,4 @@
+To move to vscodefrom your folder:code .
+for install any node-npm i
+for specific package:npm install package_name
+npm -i -D

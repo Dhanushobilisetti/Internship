@@ -1,0 +1,87 @@
+function App
+{
+	return(
+		<p>Hii</p>
+	);
+}
+export default APP;
+when we write any thing on index.js file then it can be applicable everypage in your project i.e,
+in b/w this
+<React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+After create components folder in src;
+->we need to create navbar file .
+and call this file in App.jsx folder by importing
+
+import './App.css';
+import Navbar from "./components/Navbar";
+
+function App() {
+  return (
+    <body>
+   <div>
+      <div>Hii</div>
+      <div>Hello</div>
+   </div>
+   <Navbar />
+   </body>
+  );
+}
+
+export default App;
+
+import React from 'react'
+const tasks=["Task 1","Task 2","Task 3","Task 4","Task 5"];
+
+function TaskList() {
+  return (
+    <div>
+       <h1>Tasks</h1>
+       <div>
+        {
+            tasks.map((task,idx) => (
+                    <div key={idx}>{task}</div>
+                    ))}
+       </div>
+    </div>
+  )
+}
+
+export default TaskList
+-->
+
+import TaskItem from "./TaskItem";
+const tasks=["Task 1","Task 2","Task 3","Task 4","Task 5"];
+
+function TaskList() {
+  return (
+    <div>
+       <h1>Tasks</h1>
+       <div>
+        {
+            tasks.map((task,idx) => (
+                    <TaskItem  key={idx} task={task}/>
+                    ))}
+       </div>
+    </div>
+  )
+}
+
+export default TaskList
+-->
+import React from 'react'
+
+function TaskItem(props) {
+  return (
+    <div> className=''>
+      <h2>{props.task}</h2>
+      <p>Description</p>
+    </div>
+  )
+}
+
+export default TaskItem
+
+

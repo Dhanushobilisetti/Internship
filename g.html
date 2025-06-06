@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Task Manager</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://i.pinimg.com/564x/d3/6b/34/d36b34136da16fb0923a2795dc0583a2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #000;
+        }
+        .task-list {
+            margin: 20px 0;
+            padding: 0;
+            list-style: none;
+        }
+        .task-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .task-list li:hover {
+            background-color: #f1f1f1;
+        }
+        .task-list li.complete {
+            text-decoration: line-through;
+            color: grey;
+        }
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .buttons button {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .buttons button:hover {
+            background-color: #333;
+        }
+        .buttons button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.25);
+        }
+        .buttons button:active {
+            background-color: #111;
+        }
+        .notification {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .notification p {
+            margin: 0;
+        }
+        .notification .upcoming {
+            color: orange;
+        }
+        .notification .overdue {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Personal Task Manager</h1>
+        <ul id="taskList" class="task-list"></ul>
+        <div class="buttons">
+            <button id="addButton">Add Task</button>
+            <button id="completeButton">Mark Complete</button>
+            <button id="editButton">Edit Task</button>
+            <button id="deleteButton">Delete Task</button>
+        </div>
+        <div class="notification" id="notification"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskList = document.getElementById('taskList');
+            const addButton = document.getElementById('addButton');
+            const completeButton = document.getElementById('completeButton');
+            const editButton = document.getElementById('editButton');
+            const deleteButton = document.getElementById('deleteButton');
+            const notification = document.getElementById('notification');
+
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+            function renderTasks() {
+                taskList.innerHTML = '';
+                tasks.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `${task.text} <span>Due: ${task.dueDate} ${task.dueTime}</span>`;
+                    if (task.complete) {
+                        li.classList.add('complete');
+                    }
+                    li.setAttribute('data-index', index);
+                    taskList.appendChild(li);
+                });
+            }
+
+            function saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+
+            function showNotification(message, type) {
+                const notificationItem = document.createElement('p');
+                notificationItem.textContent = message;
+                notificationItem.classList.add(type);
+                notification.appendChild(notificationItem);
+
+                setTimeout(() => {
+                    notificationItem.remove();
+                }, 10000);
+            }
+
+            function autoAlertForTasks() {
+                const now = new Date();
+                tasks.forEach(task => {
+                    const taskDueDate = new Date(`${task.dueDate}T${task.dueTime}:00`);
+                    const timeDiff = taskDueDate - now;
+                    const timeThreshold = 30 * 60 * 1000;
+
+                    if (timeDiff > 0 && timeDiff <= timeThreshold) {
+                        showNotification(`Task "${task.text}" is due soon! (Due: ${task.dueDate} ${task.dueTime})`, 'upcoming');
+                    } else if (timeDiff < 0 && !task.complete) {
+                        showNotification(`Task "${task.text}" is overdue! (Due: ${task.dueDate} ${task.dueTime})`, 'overdue');
+                    }
+                });
+            }
+
+            setInterval(autoAlertForTasks, 60000);
+
+            addButton.addEventListener('click', () => {
+                const newTask = prompt('Enter new task:');
+                const dueDate = prompt('Enter due date (YYYY-MM-DD):');
+                const dueTime = prompt('Enter due time (HH:MM):');
+                if (newTask && dueDate && dueTime) {
+                    tasks.push({ text: newTask, dueDate, dueTime, complete: false });
+                    renderTasks();
+                    saveTasks();
+                } else {
+                    alert('Please fill in all fields correctly.');
+                }
+            });
+
+            completeButton.addEventListener('click', () => {
+                const selectedTaskIndex = getSelectedTaskIndex();
+                if (selectedTaskIndex !== -1) {
+                    tasks[selectedTaskIndex].complete = !tasks[selectedTaskIndex].complete;
+                    renderTasks();
+                    saveTasks();
+                } else {
+                    alert('Please select a task to complete.');
+                }
+            });
+
+            editButton.addEventListener('click', () => {
+                const selectedTaskIndex = getSelectedTaskIndex();
+                if (selectedTaskIndex !== -1) {
+                    const task = tasks[selectedTaskIndex];
+                    const newTaskText = prompt('Edit task:', task.text) || task.text;
+                    const newDueDate = prompt('Edit due date (YYYY-MM-DD):', task.dueDate) || task.dueDate;
+                    const newDueTime = prompt('Edit due time (HH:MM):', task.dueTime) || task.dueTime;
+                    tasks[selectedTaskIndex] = { ...task, text: newTaskText, dueDate: newDueDate, dueTime: newDueTime };
+                    renderTasks();
+                    saveTasks();
+                } else {
+                    alert('Please select a task to edit.');
+                }
+            });
+
+            deleteButton.addEventListener('click', () => {
+                const selectedTaskIndex = getSelectedTaskIndex();
+                if (selectedTaskIndex !== -1) {
+                    tasks.splice(selectedTaskIndex, 1);
+                    renderTasks();
+                    saveTasks();
+                } else {
+                    alert('Please select a task to delete.');
+                }
+            });
+
+            function getSelectedTaskIndex() {
+                const selectedTask = document.querySelector('li.selected');
+                return selectedTask ? parseInt(selectedTask.getAttribute('data-index'), 10) : -1;
+            }
+
+            taskList.addEventListener('click', (event) => {
+                const li = event.target.closest('li');
+                if (li) {
+                    document.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
+                    li.classList.add('selected');
+                }
+            });
+
+            renderTasks();
+        });
+    </script>
+</body>
+</html>
